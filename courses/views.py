@@ -28,7 +28,7 @@ def course_list(request, id):
         return JsonResponse(serializer.errors, status=400)
 
 @csrf_exempt
-def course(request, cid):
+def course(request, cid, id):
     obj = Course.objects.get(id=cid)
 
     if request.method == 'GET':

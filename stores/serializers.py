@@ -5,4 +5,4 @@ class StoreSerializer(serializers.HyperlinkedModelSerializer):
     
     class Meta:
         model = Store
-        fields = ['name', 'address', 'phone', 'category', 'schedule', 'signiture', 'taste', 'feeling', 'service', 'waiting', 'price']
+        fields = ['id', 'name', 'address', 'phone', 'category', 'schedule', 'signature', 'taste', 'service', 'waiting', 'price']

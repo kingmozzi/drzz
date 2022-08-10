@@ -5,4 +5,4 @@ class CourseSerializer(serializers.HyperlinkedModelSerializer):
     
     class Meta:
         model = Course
-        fields = ['id', 'user_id', 'shared_user', 'startday', 'endday', 'course_contents']
+        fields = ['id', 'user_id', 'share_user', 'start_day', 'end_day', 'content']

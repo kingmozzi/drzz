@@ -23,6 +23,7 @@ from rest_framework import routers
 from users import views as users_views
 from stores import views as stores_views
 from courses import views as courses_views
+from reviews import views as reviews_views
 from drzz import views
 
 urlpatterns = [
@@ -49,6 +50,8 @@ urlpatterns = [
 
     path('stores', stores_views.store_list),
     path('store/<int:id>', stores_views.store),
+    path('store/<int:id>/reviews', reviews_views.review_list),
+    path('store/<int:id>/review/<int:rid>', reviews_views.review),
     #path('')
 
     #path('stores', stores_views.store)

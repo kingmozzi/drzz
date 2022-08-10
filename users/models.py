@@ -13,9 +13,7 @@ class User(AbstractUser):
 
     objects = CustomUserManager()
 
-    spouse_name = models.CharField(blank=True, max_length=100)
-
-    date_of_birth = models.DateField(blank=True, null=True)
+    birth = models.CharField(max_length=100, default="")
     age = models.IntegerField(default=0)
     sex = models.CharField(max_length=100)
 
@@ -23,9 +21,9 @@ class User(AbstractUser):
     waiting = models.FloatField(default=0.0)
     service = models.FloatField(default=0.0)
     price = models.FloatField(default=0.0)
-    feeling = models.FloatField(default=0.0)
 
     mucket = models.CharField(max_length=1000, default="")
+    friend = models.CharField(max_length=1000, default="")
     
     def __str__(self):
         return self.email
