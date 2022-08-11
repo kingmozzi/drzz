@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.kakao',
     'allauth.socialaccount.providers.github',
     'allauth.socialaccount.providers.google',
+
+    'sslserver',
 ]
 
 SITE_ID = 1
