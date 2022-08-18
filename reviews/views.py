@@ -2,6 +2,8 @@ import re
 import json
 import os
 import chardet
+import pandas as pd
+import gensim
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -13,13 +15,49 @@ from .serializers import ReviewSerializer
 from .models import Review
 from rest_framework.parsers import JSONParser
 
+from stores.models import Store
+from stores.serializers import StoreSerializer
+from users.models import User
+from users.serializers import UserSerializer
+
 from tqdm import tqdm
 from twkorean import TwitterKoreanProcessor
 
-from .review_scorer.review_scorer import ReviewScorer
+from .review_scorer.review_scorer import Doc2Category
 
-DATA_FOLDER = os.getcwd() + '/review_scorer/data/'
+DATA_FOLDER = os.getcwd() + '/reviews/review_scorer/review_scorer/data/'
 SENTI_PATH = DATA_FOLDER + 'SentiWord_info.json'
+DATA_PATH = DATA_FOLDER + 'data_origin.csv'
+# data: pd.DataFrame
+
+# with open(SENTI_PATH, mode='rt', encoding='UTF8') as f:
+#     senti = pd.DataFrame.from_dict(json.load(f))
+
+# data = pd.read_csv(DATA_PATH, encoding='UTF8')
+# data = data.dropna(axis=0)
+# data = data.sample(frac=1).reset_index(drop=True)
+
+# processor = TwitterKoreanProcessor()
+# tokenize = processor.tokenize_to_strings
+# tokens = [tokenize(_) for _ in tqdm(data.review)]
+
+# rs = Doc2Category(sentences=tokens, senti_dict_path=SENTI_PATH)
+# rs.tag(categories={'taste': ['맛', '맛있다', '맛없다'],
+#                    'price': ['가격', '싸다', '비싸다', '저렴'],
+#                    'service': ['서비스', '친절'],
+#                    'atmosphere': ['인테리어', '분위기']},
+#        width=4, depth=4)
+
+
+
+
+
+
+#rs = gensim.models.Word2Vec.load(os.getcwd()+'/reviews/DrChomp.model')
+       
+
+
+
 
 
 @csrf_exempt
@@ -31,7 +69,9 @@ def review_list(request, id):
     elif request.method == 'POST':
         data = JSONParser().parse(request)
         serializer = ReviewSerializer(data=data)
-        #give_score(data['contents'])
+        #give_score(data['content'], data)
+        user_update(data['user_id'], data)
+        store_update(data['store_id'], data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=201)
@@ -56,14 +96,71 @@ def review(request, id, rid):
         return HttpResponse(status=204)
 
 
-def give_score(review):
-    processor = TwitterKoreanProcessor()
-    tokenize = processor.tokenize_to_strings
-    tokens = tokenize(review)
-    rs = ReviewScorer(sentences=tokens, senti_dict_path=SENTI_PATH)
-    rs.tag(categories={'taste': ['맛', '맛있다', '맛없다'],
-                   'price': ['가격', '싸다', '비싸다', '저렴'],
-                   'service': ['서비스', '친절', '싸가지'],
-                   'atmosphere': ['인테리어', '분위기']}, topn=500)
-    print(review)
-    print(rs.score_review(tokenize(review)))
+def give_score(review, data):
+    tokens = tokenize(str(review))
+    scored = rs.score_review(tokenize(review))
+    data['taste'] = scored['taste']
+    data['price'] = scored['price']
+    data['service'] = scored['service']
+    data['atmosphere'] = scored['atmosphere']
+
+def user_update(uid, data):
+    obj = Review.objects.filter(user_id=uid)
+    user_obj = User.objects.get(id=uid)
+    taste_sum = 0#data['taste']
+    price_sum = 0#data['price']
+    service_sum = 0#data['service']
+    atmosphere_sum = 0#data['atmosphere']
+    count = 1
+
+    for x in obj:
+        taste_sum += x.taste
+        price_sum += x.price
+        service_sum += x.service
+        atmosphere_sum += x.atmosphere
+        count+=1
+    taste_sum /= count
+    price_sum /= count
+    service_sum /= count
+    atmosphere_sum /= count
+    
+    new_data = {
+        'email': user_obj.email,
+        'taste': taste_sum,
+        'price': price_sum,
+        'service': service_sum,
+        'atmosphere': atmosphere_sum }
+
+    serializer = UserSerializer(user_obj, data=new_data)
+    if serializer.is_valid():
+        serializer.save()
+
+def store_update(sid, data):
+    obj = Review.objects.filter(store_id = sid)
+    store_obj = Store.objects.get(id=sid)
+    taste_sum = 0#data['taste']
+    price_sum = 0#data['price']
+    service_sum = 0#data['service']
+    atmosphere_sum = 0#data['atmosphere']
+    count = 1
+
+    for x in obj:
+        taste_sum += x.taste
+        price_sum += x.price
+        service_sum += x.service
+        atmosphere_sum += x.atmosphere
+        count+=1
+    taste_sum /= count
+    price_sum /= count
+    service_sum /= count
+    atmosphere_sum /= count
+
+    new_data = {
+        'taste': taste_sum,
+        'price': price_sum,
+        'service': service_sum,
+        'atmosphere': atmosphere_sum }
+
+    serializer = StoreSerializer(store_obj, data=new_data)
+    if serializer.is_valid():
+        serializer.save()
