@@ -5,7 +5,7 @@ class Review(models.Model):
     user_id = models.IntegerField(default=0)
     store_id = models.IntegerField(default=0)
     create_date = models.CharField(max_length=200, default="")
-    content = models.CharField(max_length=1000, default="")
+    content = models.CharField(max_length=1000, default="", blank=True)
     star_rating = models.IntegerField(default=0)
 
     taste = models.FloatField(default=0.5)

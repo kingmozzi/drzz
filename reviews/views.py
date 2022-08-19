@@ -49,16 +49,8 @@ DATA_PATH = DATA_FOLDER + 'data_origin.csv'
 #        width=4, depth=4)
 
 
-
-
-
-
 #rs = gensim.models.Word2Vec.load(os.getcwd()+'/reviews/DrChomp.model')
        
-
-
-
-
 
 @csrf_exempt
 def review_list(request, id):
@@ -95,7 +87,7 @@ def review(request, id, rid):
         obj.delete()
         return HttpResponse(status=204)
 
-
+# 리뷰작성시 리뷰내용을 기반으로 채점
 def give_score(review, data):
     tokens = tokenize(str(review))
     scored = rs.score_review(tokenize(review))
@@ -104,6 +96,7 @@ def give_score(review, data):
     data['service'] = scored['service']
     data['atmosphere'] = scored['atmosphere']
 
+# 채점된 점수와 자신이 쓴 모든 리뷰를 평균치로 내어 유저 가중치 업데이트
 def user_update(uid, data):
     obj = Review.objects.filter(user_id=uid)
     user_obj = User.objects.get(id=uid)
@@ -135,6 +128,7 @@ def user_update(uid, data):
     if serializer.is_valid():
         serializer.save()
 
+# 채점된 점수와 가게에 쓰인 몯느 리뷰를 평균치로 내어 가게 가중치 업데이트
 def store_update(sid, data):
     obj = Review.objects.filter(store_id = sid)
     store_obj = Store.objects.get(id=sid)
