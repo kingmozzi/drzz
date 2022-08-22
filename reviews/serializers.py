@@ -5,4 +5,4 @@ class ReviewSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Review
-        fields = ['id', 'user_id', 'store_id', 'create_date', 'content', 'star_rating', 'taste', 'service', 'atmosphere', 'price']
+        fields = ['id', 'user_id', 'store_id', 'create_date', 'content', 'taste', 'service', 'atmosphere', 'price']
