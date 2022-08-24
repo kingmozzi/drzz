@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'users',
     'courses',
     'reviews',
+    'testapp',
 
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',

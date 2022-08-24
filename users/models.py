@@ -15,15 +15,17 @@ class User(AbstractUser):
 
     birth = models.CharField(max_length=100, default="")
     age = models.IntegerField(default=0)
-    sex = models.CharField(max_length=100)
+    sex = models.CharField(max_length=100, default="")
 
-    taste = models.FloatField(default=0.0)
-    waiting = models.FloatField(default=0.0)
-    service = models.FloatField(default=0.0)
-    price = models.FloatField(default=0.0)
+    taste = models.FloatField(default=0.5)
+    atmosphere = models.FloatField(default=0.5)
+    service = models.FloatField(default=0.5)
+    price = models.FloatField(default=0.5)
 
-    mucket = models.CharField(max_length=1000, default="")
-    friend = models.CharField(max_length=1000, default="")
+    #star_rating = models.FloatField(default=0)
+
+    mucket = models.CharField(max_length=1000, default="", blank=True)
+    friend = models.CharField(max_length=1000, default="", blank=True)
     
     def __str__(self):
         return self.email

@@ -1,9 +1,15 @@
 import re
+import json
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
+from stores.models import Store
+from stores.serializers import StoreSerializer
+from reviews.models import Review
+from reviews.serializers import ReviewSerializer
+
 from rest_framework import viewsets
 from rest_framework import permissions
 from .serializers import UserSerializer
@@ -19,6 +25,7 @@ def user(request, id):
         return JsonResponse(serializer.data, safe=False)
     elif request.method =='PUT':
         data = JSONParser().parse(request)
+        data['email'] = obj.email
         serializer = UserSerializer(obj, data=data)
         if serializer.is_valid():
             serializer.save()
@@ -37,6 +44,39 @@ def user_create(request):
             serializer.save()
             return JsonResponse(serializer.data, status=201)
         return JsonResponse(serializer.errors, status=400)
+
+@csrf_exempt
+def review_list(request, id):
+    if request.method == 'GET':
+        queryset = Review.objects.filter(user_id = id)
+        serializer = ReviewSerializer(queryset, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+
+@csrf_exempt
+def mucket_list(request, id):
+    obj = User.objects.get(id=id)
+
+    if request.method == 'GET':
+        if obj.mucket != "":
+            mucketList = list(map(int,obj.mucket.split(',')))
+            queryset = Store.objects.filter(id__in=mucketList)
+            serializer = StoreSerializer(queryset, many=True)
+            return JsonResponse(serializer.data, safe=False)
+        return HttpResponse(status=204)
+
+
+@csrf_exempt
+def friend_list(reqeust, id):
+    obj = User.objects.get(id=id)
+
+    if reqeust.method == 'GET':
+        if obj.friend != "":
+            friendList = list(map(int, obj.friend.split(',')))
+            queryset = User.objects.filter(id__in=friendList)
+            serializer = UserSerializer(queryset, many=True)
+            return JsonResponse(serializer.data, safe=False)
+        return HttpResponse(status=204)
 
 
 # from django.conf import settings
