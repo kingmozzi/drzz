@@ -100,6 +100,7 @@ def give_score(review, data):
     #         'price': 0,
     #         'service': 0,
     #         'atmosphere': 0}
+    # scored = pd.Series(scored)
     data['taste'] = scored.loc['taste']
     data['price'] = scored.loc['price']
     data['service'] = scored.loc['service']
@@ -127,6 +128,7 @@ def user_update(uid, data):
     atmosphere_sum /= count
     
     new_data = {
+        'email': user_obj.email,
         'taste': taste_sum,
         'price': price_sum,
         'service': service_sum,
