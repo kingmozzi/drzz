@@ -169,45 +169,6 @@ def store_update(sid, data):
     if serializer.is_valid():
         serializer.save()
 
-@csrf_exempt
-def score_update(request):
-    _categories = ('taste', 'price', 'service', 'atmosphere')
-    objs = Review.objects.all()
-
-    review_df = pd.DataFrame({'review': [obj.content for obj in objs]},
-                                 index=[obj.id for obj in objs])
-    scores = pd.DataFrame(columns=_categories, index=review_df.index)
-
-    # Scoring Reviews
-    for i, row in tqdm(review_df.iterrows(), desc='scoring', total=len(review_df)):
-        scores.loc[i, _categories] = rs.score_review(tokenize(str(row.review)))
-    
-    # After Processing
-    scored_review = pd.concat([review_df, scores], axis=1)
-    scored_review.loc[:, _categories] = scored_review.loc[:, _categories].astype('float')
-    scored_review.fillna(0., inplace=True)
-
-    # Min-Max Scaling
-    for c in _categories:
-        scored_review.loc[:, c] = minmax_scale(scored_review.loc[:, c])
-
-    # 여기부터 쓰면 됩니다
-    
-    for id, row in scored_review.iterrows():
-        # id : 스코어링 된 리뷰의 id
-        # row.taste, row.price, row.service, row.atmosphere로 값 불러오기
-        obj = Review.objects.get(id=id)
-        data = {'taste': row.taste,
-                'price': row.price,
-                'service': row.service,
-                'atmosphere': row.atmosphere}
-        serializer = ReviewSerializer(obj, data=data)
-        if serializer.is_valid():
-            serializer.save()
-
-    return HttpResponse(status=201)
-
-@csrf_exempt
 def store_score_update(request):
     objs = Store.objects.all()
 
@@ -242,6 +203,40 @@ def store_score_update(request):
         if serializer.is_valid():
             serializer.save()
 
-    return HttpResponse(status=201)
+@csrf_exempt
+def score_update(request):
+    _categories = ('taste', 'price', 'service', 'atmosphere')
+    objs = Review.objects.all()
 
-#store_score_update('GET')
+    review_df = pd.DataFrame({'review': [obj.content for obj in objs]},
+                                 index=[obj.id for obj in objs])
+    scores = pd.DataFrame(columns=_categories, index=review_df.index)
+
+    # Scoring Reviews
+    for i, row in tqdm(review_df.iterrows(), desc='scoring', total=len(review_df)):
+        scores.loc[i, _categories] = rs.score_review(tokenize(str(row.review)))
+    
+    # After Processing
+    scored_review = pd.concat([review_df, scores], axis=1)
+    scored_review.loc[:, _categories] = scored_review.loc[:, _categories].astype('float')
+    scored_review.fillna(0., inplace=True)
+
+    # Min-Max Scaling
+    for c in _categories:
+        scored_review.loc[:, c] = minmax_scale(scored_review.loc[:, c])
+
+    # 여기부터 쓰면 됩니다
+    
+    for id, row in scored_review.iterrows():
+        # id : 스코어링 된 리뷰의 id
+        # row.taste, row.price, row.service, row.atmosphere로 값 불러오기
+        obj = Review.objects.get(id=id)
+        data = {'taste': row.taste/2,
+                'price': row.price/2,
+                'service': row.service/2,
+                'atmosphere': row.atmosphere/2}
+        serializer = ReviewSerializer(obj, data=data)
+        if serializer.is_valid():
+            serializer.save()
+    store_score_update('GET')
+    return HttpResponse(status=201)

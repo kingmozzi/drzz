@@ -61,7 +61,7 @@ urlpatterns = [
     path('store/<int:id>/like/<int:uid>', stores_views.store_like),
 
     path('reviews/update', reviews_views.score_update),
-    path('stores/update', reviews_views.store_score_update),
+    #path('stores/update', reviews_views.store_score_update),
 
     path('tests', test_views.test_list ),
     path('test/<int:id>', test_views.test),
